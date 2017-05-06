@@ -7,44 +7,7 @@ use Jaxon\Sentry\View\Store;
 
 class View implements ViewInterface
 {
-    /**
-     * The Dwoo template renderer
-     *
-     * @var Dwoo\Core
-     */
-    protected $xRenderer = null;
-
-    /**
-     * The template directories
-     *
-     * @var array
-     */
-    protected $aDirectories = array();
-
-    /**
-     * The view constructor
-     * 
-     * @return
-     */
-    public function __construct()
-    {
-        $this->xRenderer = new \Dwoo\Core();
-        $this->xRenderer->setCacheDir(__DIR__ . '../cache');
-    }
-
-    /**
-     * Add a namespace to this view renderer
-     *
-     * @param string        $sNamespace         The namespace name
-     * @param string        $sDirectory         The namespace directory
-     * @param string        $sExtension         The extension to append to template names
-     *
-     * @return void
-     */
-    public function addNamespace($sNamespace, $sDirectory, $sExtension = '')
-    {
-        $this->aDirectories[$sNamespace] = array('path' => $sDirectory, 'ext' => $sExtension);
-    }
+    use \Jaxon\Sentry\View\Namespaces;
 
     /**
      * Render a view
@@ -63,22 +26,21 @@ class View implements ViewInterface
         {
             $sViewName = substr($sViewName, $nNsLen);
         }
+
+        // View namespace
+        $this->setCurrentNamespace($sNamespace);
+
         // View data
+        $xRenderer = new \Dwoo\Core();
+        $xRenderer->setCacheDir(__DIR__ . '../cache');
         $data = new \Dwoo\Data();
         foreach($store->getViewData() as $sName => $xValue)
         {
             $data->assign($sName, $xValue);
         }
-        // View extension
-        $sDirectory = '';
-        $sExtension = '';
-        if(key_exists($sNamespace, $this->aDirectories))
-        {
-            $sDirectory = $this->aDirectories[$sNamespace]['path'];
-            $sExtension = $this->aDirectories[$sNamespace]['ext'];
-        }
+
         // Render the template
-        $template = new \Dwoo\Template\File($sDirectory . '/' . $sViewName . $sExtension);
-        return trim($this->xRenderer->get($template, $data), " \t\n");
+        $template = new \Dwoo\Template\File($this->sDirectory . $sViewName . $this->sExtension);
+        return trim($xRenderer->get($template, $data), " \t\n");
     }
 }
