@@ -32,7 +32,7 @@ class View implements ViewInterface
 
         // View data
         $xRenderer = new \Dwoo\Core();
-        $xRenderer->setCacheDir(__DIR__ . '../cache');
+        $xRenderer->setCacheDir(__DIR__ . '/../cache');
         $data = new \Dwoo\Data();
         foreach($store->getViewData() as $sName => $xValue)
         {
